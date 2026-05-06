@@ -1,0 +1,662 @@
+/* ===== CSS Variables - Themes ===== */
+:root {
+  /* Tomato theme (default) */
+  --bg: #FFF5F5;
+  --card-bg: #FFFFFF;
+  --text: #4A2020;
+  --text-secondary: #8B6B6B;
+  --accent: #E53935;
+  --accent-light: #FFCDD2;
+  --accent-dark: #B71C1C;
+  --tomato-body: #E53935;
+  --tomato-highlight: #FF5252;
+  --tomato-shadow: #C62828;
+  --leaf: #4CAF50;
+  --leaf-dark: #2E7D32;
+  --ring-bg: #FFCDD2;
+  --ring-progress: #E53935;
+  --btn-primary: #E53935;
+  --btn-primary-hover: #C62828;
+  --success: #4CAF50;
+  --shadow: rgba(229, 57, 53, 0.15);
+}
+
+[data-theme="forest"] {
+  --bg: #F1F8E9;
+  --card-bg: #FFFFFF;
+  --text: #1B3A1B;
+  --text-secondary: #5D7A5D;
+  --accent: #4CAF50;
+  --accent-light: #C8E6C9;
+  --accent-dark: #2E7D32;
+  --tomato-body: #66BB6A;
+  --tomato-highlight: #81C784;
+  --tomato-shadow: #43A047;
+  --leaf: #2E7D32;
+  --leaf-dark: #1B5E20;
+  --ring-bg: #C8E6C9;
+  --ring-progress: #4CAF50;
+  --btn-primary: #4CAF50;
+  --btn-primary-hover: #388E3C;
+  --success: #2E7D32;
+  --shadow: rgba(76, 175, 80, 0.15);
+}
+
+[data-theme="ocean"] {
+  --bg: #E3F2FD;
+  --card-bg: #FFFFFF;
+  --text: #0D2137;
+  --text-secondary: #546E7A;
+  --accent: #2196F3;
+  --accent-light: #BBDEFB;
+  --accent-dark: #1565C0;
+  --tomato-body: #42A5F5;
+  --tomato-highlight: #64B5F6;
+  --tomato-shadow: #1E88E5;
+  --leaf: #26A69A;
+  --leaf-dark: #00897B;
+  --ring-bg: #BBDEFB;
+  --ring-progress: #2196F3;
+  --btn-primary: #2196F3;
+  --btn-primary-hover: #1976D2;
+  --success: #00897B;
+  --shadow: rgba(33, 150, 243, 0.15);
+}
+
+/* ===== Reset & Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+  -webkit-app-region: no-select;
+}
+
+/* ===== Titlebar ===== */
+.titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 36px;
+  background: var(--accent);
+  -webkit-app-region: drag;
+  padding: 0 8px;
+}
+
+.titlebar-drag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.titlebar-icon {
+  font-size: 16px;
+}
+
+.titlebar-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
+
+.titlebar-buttons {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-btn {
+  width: 28px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+#btn-close:hover {
+  background: #FF1744;
+}
+
+/* ===== Container ===== */
+.container {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: calc(100vh - 36px);
+}
+
+/* ===== Mode Tabs ===== */
+.mode-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--accent-light);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.mode-tab {
+  padding: 6px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.mode-tab.active {
+  background: var(--card-bg);
+  color: var(--accent);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+/* ===== Tomato Timer ===== */
+.tomato-wrapper {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 8px 0 16px;
+}
+
+.tomato {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Leaf */
+.tomato-leaf {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  animation: leafSway 3s ease-in-out infinite;
+}
+
+.leaf-left, .leaf-right {
+  position: absolute;
+  width: 28px;
+  height: 16px;
+  background: var(--leaf);
+  border-radius: 50% 50% 50% 0;
+  top: 0;
+}
+
+.leaf-left {
+  left: -20px;
+  transform: rotate(-30deg);
+}
+
+.leaf-right {
+  left: 2px;
+  transform: rotate(30deg) scaleX(-1);
+}
+
+.leaf-stem {
+  position: absolute;
+  width: 4px;
+  height: 18px;
+  background: var(--leaf-dark);
+  left: -2px;
+  top: -6px;
+  border-radius: 2px;
+}
+
+@keyframes leafSway {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  50% { transform: translateX(-50%) rotate(3deg); }
+}
+
+/* SVG Ring */
+.tomato-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  z-index: 1;
+}
+
+.ring-bg {
+  fill: none;
+  stroke: var(--ring-bg);
+  stroke-width: 8;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: var(--ring-progress);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 628.32;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+/* Tomato Body */
+.tomato-body {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  background: radial-gradient(ellipse at 35% 30%, var(--tomato-highlight), var(--tomato-body) 50%, var(--tomato-shadow) 100%);
+  border-radius: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 -8px 20px rgba(0,0,0,0.15),
+    0 4px 20px var(--shadow);
+}
+
+/* Face */
+.tomato-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.eyes {
+  display: flex;
+  gap: 20px;
+}
+
+.eye {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pupil {
+  width: 7px;
+  height: 7px;
+  background: #333;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.mouth {
+  width: 16px;
+  height: 8px;
+  border-bottom: 3px solid rgba(255,255,255,0.8);
+  border-radius: 0 0 50% 50%;
+  transition: all 0.3s ease;
+}
+
+/* Face states */
+.tomato-face.focused .pupil {
+  transform: translateY(-2px);
+}
+
+.tomato-face.happy .mouth {
+  width: 20px;
+  height: 10px;
+  border-bottom-width: 3px;
+}
+
+.tomato-face.sleeping .eye {
+  height: 3px;
+  border-radius: 2px;
+}
+
+.tomato-face.sleeping .pupil {
+  display: none;
+}
+
+/* Timer Display */
+.timer-display {
+  text-align: center;
+}
+
+.timer-time {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+}
+
+.timer-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.85);
+  margin-top: 2px;
+}
+
+/* Pulse animation for last 10 seconds */
+.tomato.pulsing .tomato-body {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* ===== Pomodoro Dots ===== */
+.pomodoro-dots {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-light);
+  transition: all 0.3s ease;
+}
+
+.dot.filled {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--shadow);
+}
+
+/* ===== Controls ===== */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-app-region: no-drag;
+}
+
+.btn-primary {
+  padding: 12px 32px;
+  background: var(--btn-primary);
+  color: white;
+  border-radius: 28px;
+  font-size: 15px;
+  font-weight: 600;
+  gap: 8px;
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--shadow);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.btn-secondary:hover {
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* ===== Stats Bar ===== */
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px var(--shadow);
+  width: 100%;
+  max-width: 360px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 30px;
+  background: var(--accent-light);
+}
+
+/* ===== Settings ===== */
+.settings-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.settings-btn:hover {
+  color: var(--accent);
+  transform: rotate(30deg);
+}
+
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-overlay.open {
+  display: flex;
+}
+
+.settings-panel {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.settings-header h3 {
+  font-size: 18px;
+  color: var(--text);
+}
+
+.settings-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--accent-light);
+  color: var(--accent);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setting-group {
+  margin-bottom: 18px;
+}
+
+.setting-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.setting-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-slider input[type="range"] {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  background: var(--accent-light);
+  border-radius: 3px;
+  outline: none;
+}
+
+.setting-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+
+.setting-slider span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  min-width: 28px;
+  text-align: right;
+}
+
+.theme-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 2px solid var(--accent-light);
+  background: var(--card-bg);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.theme-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.theme-preview {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.tomato-preview {
+  background: linear-gradient(135deg, #FF5252, #E53935);
+}
+
+.forest-preview {
+  background: linear-gradient(135deg, #81C784, #4CAF50);
+}
+
+.ocean-preview {
+  background: linear-gradient(135deg, #64B5F6, #2196F3);
+}
+
+.setting-group input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+  animation: fadeIn 0.4s ease;
+}
