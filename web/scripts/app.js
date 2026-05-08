@@ -18,6 +18,7 @@
   const btnClose = document.getElementById('btn-close');
   const modeTabs = document.querySelectorAll('.mode-tab');
   const pomDots = document.querySelectorAll('#pomodoro-dots .dot');
+  let focusStartedAt = null;
 
   // Ring circumference
   const RING_CIRCUMFERENCE = 2 * Math.PI * 100; // ~628.32
@@ -110,9 +111,12 @@
   timer.onComplete = async (type) => {
     window.soundManager.stopAmbience();
     if (type === 'work') {
+      const startedAt = focusStartedAt || new Date(Date.now() - settings.workDuration * 60000).toISOString();
+      const endedAt = new Date().toISOString();
+      focusStartedAt = null;
       await window.soundManager.playComplete();
       const workMin = settings.workDuration;
-      await window.statsManager.addPomodoro(workMin);
+      await window.statsManager.addPomodoro(workMin, startedAt, endedAt);
 
       // Face celebration
       faceEl.className = 'tomato-face happy';
@@ -130,6 +134,9 @@
       timer.pause();
       window.soundManager.stopAmbience();
     } else {
+      if (timer.mode === 'work' && timer.isIdle) {
+        focusStartedAt = new Date().toISOString();
+      }
       timer.start();
       if (timer.mode === 'work') window.soundManager.startAmbience();
     }
@@ -138,12 +145,14 @@
   btnReset.addEventListener('click', () => {
     window.soundManager.playClick();
     timer.reset();
+    if (timer.mode === 'work') focusStartedAt = null;
     window.soundManager.stopAmbience();
   });
 
   btnSkip.addEventListener('click', () => {
     window.soundManager.playClick();
     timer.skip();
+    if (timer.mode === 'work') focusStartedAt = null;
     window.soundManager.stopAmbience();
   });
 
@@ -152,6 +161,7 @@
     tab.addEventListener('click', () => {
       window.soundManager.playClick();
       timer.setMode(tab.dataset.mode);
+      focusStartedAt = null;
       window.soundManager.stopAmbience();
     });
   });

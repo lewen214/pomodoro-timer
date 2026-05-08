@@ -52,11 +52,15 @@ assert(html.includes('id="set-ambience"'), 'Missing ambience selector');
 assert(html.includes('id="file-ambience"'), 'Missing ambience file import');
 assert(html.includes('id="set-focus-alert"'), 'Missing focus alert selector');
 assert(html.includes('id="calendar-grid"'), 'Missing calendar grid');
+assert(html.includes('id="sessions-list"'), 'Missing focus session list');
 assert(appJs.includes('handleAudioImport'), 'Missing local audio import handler');
+assert(appJs.includes('focusStartedAt'), 'Missing focus start capture');
 assert(soundJs.includes('indexedDB.open'), 'Missing custom sound persistence');
 assert(soundJs.includes('startAmbience'), 'Missing ambience playback API');
 assert(statsJs.includes('renderCalendar'), 'Missing calendar rendering');
+assert(statsJs.includes('deleteSession'), 'Missing session deletion');
 assert(storeJs.includes('history'), 'Missing stats history support');
+assert(storeJs.includes('sessions'), 'Missing focus session support');
 
 const server = createStaticServer();
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));

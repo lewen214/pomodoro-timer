@@ -29,7 +29,11 @@ function createEmptyStats(dateKey = getLocalDateKey()) {
     todayMinutes: 0,
     totalPomodoros: 0,
     totalMinutes: 0,
+    legacyPomodoros: 0,
+    legacyMinutes: 0,
     history: {},
+    legacyHistory: {},
+    sessions: [],
   };
 }
 
@@ -41,10 +45,22 @@ function normalizeStats(stats = createEmptyStats()) {
   const today = getLocalDateKey();
   const normalized = { ...createEmptyStats(today), ...stats };
   normalized.history = normalized.history || {};
+  normalized.legacyHistory = normalized.legacyHistory || {};
+  normalized.sessions = Array.isArray(normalized.sessions) ? normalized.sessions : [];
   const parsedLegacyDate = new Date(normalized.todayDate);
   const storedDateKey = Number.isNaN(parsedLegacyDate.getTime())
     ? normalized.todayDate
     : getLocalDateKey(parsedLegacyDate);
+
+  if (
+    normalized.sessions.length === 0 &&
+    normalized.legacyPomodoros === 0 &&
+    normalized.legacyMinutes === 0 &&
+    (normalized.totalPomodoros > 0 || normalized.totalMinutes > 0)
+  ) {
+    normalized.legacyPomodoros = normalized.totalPomodoros;
+    normalized.legacyMinutes = normalized.totalMinutes;
+  }
 
   if (storedDateKey && !normalized.history[storedDateKey]) {
     normalized.history[storedDateKey] = {
@@ -53,17 +69,45 @@ function normalizeStats(stats = createEmptyStats()) {
     };
   }
 
-  if (!normalized.history[today]) {
-    normalized.history[today] = { pomodoros: 0, minutes: 0 };
+  if (Object.keys(normalized.legacyHistory).length === 0) {
+    normalized.legacyHistory = { ...normalized.history };
   }
 
-  if (normalized.todayDate !== today) {
-    normalized.todayDate = today;
-    normalized.todayPomodoros = normalized.history[today].pomodoros;
-    normalized.todayMinutes = normalized.history[today].minutes;
-  }
+  return recalculateStats(normalized);
+}
 
-  return normalized;
+function recalculateStats(stats) {
+  const today = getLocalDateKey();
+  const history = {};
+  let sessionPomodoros = 0;
+  let sessionMinutes = 0;
+
+  Object.entries(stats.legacyHistory || {}).forEach(([dateKey, entry]) => {
+    history[dateKey] = {
+      pomodoros: Number(entry.pomodoros) || 0,
+      minutes: Number(entry.minutes) || 0,
+    };
+  });
+
+  stats.sessions.forEach((session) => {
+    const dateKey = session.date || getLocalDateKey(new Date(session.endAt || session.startAt));
+    const minutes = Number(session.minutes) || 0;
+    if (!history[dateKey]) history[dateKey] = { pomodoros: 0, minutes: 0 };
+    history[dateKey].pomodoros++;
+    history[dateKey].minutes += minutes;
+    sessionPomodoros++;
+    sessionMinutes += minutes;
+  });
+
+  if (!history[today]) history[today] = { pomodoros: 0, minutes: 0 };
+
+  stats.history = history;
+  stats.todayDate = today;
+  stats.todayPomodoros = history[today].pomodoros;
+  stats.todayMinutes = history[today].minutes;
+  stats.totalPomodoros = (Number(stats.legacyPomodoros) || 0) + sessionPomodoros;
+  stats.totalMinutes = (Number(stats.legacyMinutes) || 0) + sessionMinutes;
+  return stats;
 }
 
 class Store {
@@ -128,3 +172,4 @@ class Store {
 
 window.store = new Store();
 window.getLocalDateKey = getLocalDateKey;
+window.recalculateStats = recalculateStats;

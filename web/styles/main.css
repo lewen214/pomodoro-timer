@@ -712,7 +712,7 @@ body {
 /* ===== Calendar ===== */
 .calendar-panel {
   width: min(100% - 32px, 620px);
-  margin: 0 auto 88px;
+  margin: 0 auto 18px;
   padding: 18px;
   background: var(--card-bg);
   border-radius: 8px;
@@ -809,6 +809,90 @@ body {
   color: var(--text-secondary);
 }
 
+.sessions-panel {
+  width: min(100% - 32px, 620px);
+  margin: 0 auto 88px;
+  padding: 18px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+.sessions-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sessions-header h2 {
+  font-size: 18px;
+  color: var(--text);
+}
+
+.sessions-header p,
+.sessions-empty {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--accent-light);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.6);
+}
+
+.session-item strong,
+.session-item span {
+  display: block;
+}
+
+.session-item strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.session-item span {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.session-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.session-meta span {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.session-meta button {
+  min-width: 54px;
+  height: 32px;
+  border: none;
+  border-radius: 16px;
+  background: var(--accent-light);
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-size: 12px;
+}
+
 /* ===== Animations ===== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -848,6 +932,11 @@ body {
     padding: 14px;
   }
 
+  .sessions-panel {
+    width: calc(100% - 24px);
+    padding: 14px;
+  }
+
   .calendar-grid {
     gap: 4px;
   }
@@ -855,5 +944,16 @@ body {
   .calendar-day {
     min-height: 50px;
     padding: 5px 4px;
+  }
+
+  .session-item,
+  .sessions-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .session-meta {
+    width: 100%;
+    justify-content: space-between;
   }
 }

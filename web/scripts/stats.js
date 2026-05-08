@@ -7,6 +7,8 @@ class StatsManager {
     this.calendarGridEl = document.getElementById('calendar-grid');
     this.calendarMonthEl = document.getElementById('calendar-month');
     this.calendarSummaryEl = document.getElementById('calendar-summary');
+    this.sessionsListEl = document.getElementById('sessions-list');
+    this.sessionsEmptyEl = document.getElementById('sessions-empty');
     this.currentMonth = new Date();
   }
 
@@ -20,24 +22,32 @@ class StatsManager {
     this.minutesEl.textContent = stats.todayMinutes;
     this.totalEl.textContent = stats.totalPomodoros;
     this.renderCalendar(stats);
+    this.renderSessions(stats);
   }
 
-  async addPomodoro(workMinutes) {
+  async addPomodoro(workMinutes, startedAt, endedAt) {
     const stats = window.store.stats;
-    const today = window.getLocalDateKey();
-    if (!stats.history) stats.history = {};
-    if (!stats.history[today]) stats.history[today] = { pomodoros: 0, minutes: 0 };
-
-    stats.todayPomodoros++;
-    stats.todayMinutes += workMinutes;
-    stats.totalPomodoros++;
-    stats.totalMinutes += workMinutes;
-    stats.todayDate = today;
-    stats.history[today].pomodoros = stats.todayPomodoros;
-    stats.history[today].minutes = stats.todayMinutes;
+    const endDate = endedAt ? new Date(endedAt) : new Date();
+    const session = {
+      id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      date: window.getLocalDateKey(endDate),
+      startAt: startedAt || new Date(Date.now() - workMinutes * 60000).toISOString(),
+      endAt: endedAt || endDate.toISOString(),
+      minutes: workMinutes,
+    };
+    stats.sessions = [session, ...(stats.sessions || [])];
+    window.recalculateStats(stats);
 
     await window.store.saveStats(stats);
     await window.store.notifyPomodoroComplete(stats);
+    this.render(stats);
+  }
+
+  async deleteSession(sessionId) {
+    const stats = window.store.stats;
+    stats.sessions = (stats.sessions || []).filter((session) => session.id !== sessionId);
+    window.recalculateStats(stats);
+    await window.store.saveStats(stats);
     this.render(stats);
   }
 
@@ -99,6 +109,43 @@ class StatsManager {
     }
 
     this.calendarSummaryEl.textContent = `本月 ${monthPomodoros} 次专注 · ${monthMinutes} 分钟`;
+  }
+
+  renderSessions(stats) {
+    if (!this.sessionsListEl) return;
+    const sessions = stats.sessions || [];
+    this.sessionsListEl.innerHTML = '';
+    this.sessionsEmptyEl.hidden = sessions.length > 0;
+
+    sessions.forEach((session) => {
+      const item = document.createElement('div');
+      item.className = 'session-item';
+      item.innerHTML = `
+        <div>
+          <strong>${this.formatDate(session.date)}</strong>
+          <span>${this.formatTime(session.startAt)} - ${this.formatTime(session.endAt)}</span>
+        </div>
+        <div class="session-meta">
+          <span>${session.minutes} 分钟</span>
+          <button type="button" data-session-id="${session.id}">删除</button>
+        </div>
+      `;
+      item.querySelector('button').addEventListener('click', () => this.deleteSession(session.id));
+      this.sessionsListEl.appendChild(item);
+    });
+  }
+
+  formatDate(dateKey) {
+    const [, month, day] = dateKey.split('-');
+    return `${month}月${day}日`;
+  }
+
+  formatTime(value) {
+    return new Date(value).toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   }
 }
 
