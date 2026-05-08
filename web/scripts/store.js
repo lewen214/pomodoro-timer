@@ -1,4 +1,71 @@
 // Store bridge - wraps electron IPC for settings and stats
+const DEFAULT_SETTINGS = {
+  workDuration: 25,
+  shortBreak: 5,
+  longBreak: 15,
+  pomodorosUntilLong: 4,
+  theme: 'tomato',
+  soundEnabled: true,
+  ambienceSound: 'off',
+  ambienceVolume: 35,
+  focusAlertSound: 'chime',
+  breakAlertSound: 'soft',
+  customAmbienceName: '',
+  customFocusAlertName: '',
+  customBreakAlertName: '',
+};
+
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function createEmptyStats(dateKey = getLocalDateKey()) {
+  return {
+    todayDate: dateKey,
+    todayPomodoros: 0,
+    todayMinutes: 0,
+    totalPomodoros: 0,
+    totalMinutes: 0,
+    history: {},
+  };
+}
+
+function normalizeSettings(settings = {}) {
+  return { ...DEFAULT_SETTINGS, ...settings };
+}
+
+function normalizeStats(stats = createEmptyStats()) {
+  const today = getLocalDateKey();
+  const normalized = { ...createEmptyStats(today), ...stats };
+  normalized.history = normalized.history || {};
+  const parsedLegacyDate = new Date(normalized.todayDate);
+  const storedDateKey = Number.isNaN(parsedLegacyDate.getTime())
+    ? normalized.todayDate
+    : getLocalDateKey(parsedLegacyDate);
+
+  if (storedDateKey && !normalized.history[storedDateKey]) {
+    normalized.history[storedDateKey] = {
+      pomodoros: normalized.todayPomodoros || 0,
+      minutes: normalized.todayMinutes || 0,
+    };
+  }
+
+  if (!normalized.history[today]) {
+    normalized.history[today] = { pomodoros: 0, minutes: 0 };
+  }
+
+  if (normalized.todayDate !== today) {
+    normalized.todayDate = today;
+    normalized.todayPomodoros = normalized.history[today].pomodoros;
+    normalized.todayMinutes = normalized.history[today].minutes;
+  }
+
+  return normalized;
+}
+
 class Store {
   constructor() {
     this._settings = null;
@@ -7,14 +74,10 @@ class Store {
 
   async loadSettings() {
     if (window.electronAPI) {
-      this._settings = await window.electronAPI.getSettings();
+      this._settings = normalizeSettings(await window.electronAPI.getSettings());
     } else {
-      // Fallback for dev without electron
       const saved = localStorage.getItem('settings');
-      this._settings = saved ? JSON.parse(saved) : {
-        workDuration: 25, shortBreak: 5, longBreak: 15,
-        pomodorosUntilLong: 4, theme: 'tomato', soundEnabled: true
-      };
+      this._settings = normalizeSettings(saved ? JSON.parse(saved) : {});
     }
     return this._settings;
   }
@@ -30,23 +93,10 @@ class Store {
 
   async loadStats() {
     if (window.electronAPI) {
-      this._stats = await window.electronAPI.getStats();
+      this._stats = normalizeStats(await window.electronAPI.getStats());
     } else {
       const saved = localStorage.getItem('stats');
-      const today = new Date().toDateString();
-      if (saved) {
-        this._stats = JSON.parse(saved);
-        if (this._stats.todayDate !== today) {
-          this._stats.todayDate = today;
-          this._stats.todayPomodoros = 0;
-          this._stats.todayMinutes = 0;
-        }
-      } else {
-        this._stats = {
-          todayDate: today, todayPomodoros: 0, todayMinutes: 0,
-          totalPomodoros: 0, totalMinutes: 0
-        };
-      }
+      this._stats = normalizeStats(saved ? JSON.parse(saved) : createEmptyStats());
     }
     return this._stats;
   }
@@ -77,3 +127,4 @@ class Store {
 }
 
 window.store = new Store();
+window.getLocalDateKey = getLocalDateKey;

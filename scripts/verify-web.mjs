@@ -38,11 +38,25 @@ function createStaticServer() {
 }
 
 const html = await readFile(join(root, 'index.html'), 'utf8');
+const appJs = await readFile(join(root, 'scripts', 'app.js'), 'utf8');
+const soundJs = await readFile(join(root, 'scripts', 'sounds.js'), 'utf8');
+const statsJs = await readFile(join(root, 'scripts', 'stats.js'), 'utf8');
+const storeJs = await readFile(join(root, 'scripts', 'store.js'), 'utf8');
+
 assert(html.includes('<title>番茄钟 | 在线专注计时器</title>'), 'Missing web page title');
 assert(html.includes('styles/main.css'), 'Missing stylesheet link');
 assert(html.includes('scripts/app.js'), 'Missing app script');
 assert(!html.includes('id="btn-minimize"'), 'Desktop minimize button should not ship in web page');
 assert(!html.includes('id="btn-close"'), 'Desktop close button should not ship in web page');
+assert(html.includes('id="set-ambience"'), 'Missing ambience selector');
+assert(html.includes('id="file-ambience"'), 'Missing ambience file import');
+assert(html.includes('id="set-focus-alert"'), 'Missing focus alert selector');
+assert(html.includes('id="calendar-grid"'), 'Missing calendar grid');
+assert(appJs.includes('handleAudioImport'), 'Missing local audio import handler');
+assert(soundJs.includes('indexedDB.open'), 'Missing custom sound persistence');
+assert(soundJs.includes('startAmbience'), 'Missing ambience playback API');
+assert(statsJs.includes('renderCalendar'), 'Missing calendar rendering');
+assert(storeJs.includes('history'), 'Missing stats history support');
 
 const server = createStaticServer();
 await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen));
@@ -50,7 +64,14 @@ await new Promise((resolveListen) => server.listen(0, '127.0.0.1', resolveListen
 try {
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
-  const paths = ['/', '/styles/main.css', '/scripts/app.js', '/scripts/store.js'];
+  const paths = [
+    '/',
+    '/styles/main.css',
+    '/scripts/app.js',
+    '/scripts/store.js',
+    '/scripts/sounds.js',
+    '/scripts/stats.js',
+  ];
 
   for (const path of paths) {
     const response = await fetch(`${baseUrl}${path}`);

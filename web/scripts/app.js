@@ -27,7 +27,7 @@
   document.body.setAttribute('data-theme', settings.theme);
 
   // Init sound
-  window.soundManager.setEnabled(settings.soundEnabled);
+  window.soundManager.configure(settings);
 
   // Init timer
   const timer = new window.Timer();
@@ -108,8 +108,9 @@
   timer.onStateChange = updateState;
 
   timer.onComplete = async (type) => {
+    window.soundManager.stopAmbience();
     if (type === 'work') {
-      window.soundManager.playComplete();
+      await window.soundManager.playComplete();
       const workMin = settings.workDuration;
       await window.statsManager.addPomodoro(workMin);
 
@@ -117,7 +118,7 @@
       faceEl.className = 'tomato-face happy';
       setTimeout(() => { faceEl.className = 'tomato-face'; }, 2000);
     } else {
-      window.soundManager.playBreakEnd();
+      await window.soundManager.playBreakEnd();
       await window.store.notifyBreakComplete();
     }
   };
@@ -127,19 +128,23 @@
     window.soundManager.playClick();
     if (timer.isRunning) {
       timer.pause();
+      window.soundManager.stopAmbience();
     } else {
       timer.start();
+      if (timer.mode === 'work') window.soundManager.startAmbience();
     }
   });
 
   btnReset.addEventListener('click', () => {
     window.soundManager.playClick();
     timer.reset();
+    window.soundManager.stopAmbience();
   });
 
   btnSkip.addEventListener('click', () => {
     window.soundManager.playClick();
     timer.skip();
+    window.soundManager.stopAmbience();
   });
 
   // Mode tabs
@@ -147,6 +152,7 @@
     tab.addEventListener('click', () => {
       window.soundManager.playClick();
       timer.setMode(tab.dataset.mode);
+      window.soundManager.stopAmbience();
     });
   });
 
@@ -158,6 +164,19 @@
   const setShortVal = document.getElementById('set-short-val');
   const setLongVal = document.getElementById('set-long-val');
   const setSound = document.getElementById('set-sound');
+  const setAmbience = document.getElementById('set-ambience');
+  const setAmbienceVolume = document.getElementById('set-ambience-volume');
+  const setAmbienceVolumeVal = document.getElementById('set-ambience-volume-val');
+  const setFocusAlert = document.getElementById('set-focus-alert');
+  const setBreakAlert = document.getElementById('set-break-alert');
+  const fileAmbience = document.getElementById('file-ambience');
+  const fileFocusAlert = document.getElementById('file-focus-alert');
+  const fileBreakAlert = document.getElementById('file-break-alert');
+  const ambienceFileName = document.getElementById('ambience-file-name');
+  const focusAlertFileName = document.getElementById('focus-alert-file-name');
+  const breakAlertFileName = document.getElementById('break-alert-file-name');
+  const calendarPrev = document.getElementById('calendar-prev');
+  const calendarNext = document.getElementById('calendar-next');
   const themeBtns = document.querySelectorAll('.theme-btn');
 
   function openSettings() {
@@ -168,6 +187,14 @@
     setShortVal.textContent = settings.shortBreak;
     setLongVal.textContent = settings.longBreak;
     setSound.checked = settings.soundEnabled;
+    setAmbience.value = settings.ambienceSound;
+    setAmbienceVolume.value = settings.ambienceVolume;
+    setAmbienceVolumeVal.textContent = settings.ambienceVolume;
+    setFocusAlert.value = settings.focusAlertSound;
+    setBreakAlert.value = settings.breakAlertSound;
+    ambienceFileName.textContent = settings.customAmbienceName || '未选择文件';
+    focusAlertFileName.textContent = settings.customFocusAlertName || '未选择文件';
+    breakAlertFileName.textContent = settings.customBreakAlertName || '未选择文件';
     themeBtns.forEach(b => b.classList.toggle('active', b.dataset.theme === settings.theme));
     settingsOverlay.classList.add('open');
   }
@@ -205,6 +232,56 @@
     applySettings();
   });
 
+  setAmbience.addEventListener('change', () => {
+    settings.ambienceSound = setAmbience.value;
+    applySettings();
+    if (timer.isRunning && timer.mode === 'work') window.soundManager.startAmbience();
+  });
+
+  setAmbienceVolume.addEventListener('input', () => {
+    settings.ambienceVolume = parseInt(setAmbienceVolume.value);
+    setAmbienceVolumeVal.textContent = settings.ambienceVolume;
+    applySettings();
+    if (timer.isRunning && timer.mode === 'work') window.soundManager.startAmbience();
+  });
+
+  setFocusAlert.addEventListener('change', () => {
+    settings.focusAlertSound = setFocusAlert.value;
+    applySettings();
+  });
+
+  setBreakAlert.addEventListener('change', () => {
+    settings.breakAlertSound = setBreakAlert.value;
+    applySettings();
+  });
+
+  fileAmbience.addEventListener('change', () => handleAudioImport(
+    fileAmbience,
+    'ambience',
+    'customAmbienceName',
+    ambienceFileName,
+    'ambienceSound'
+  ));
+
+  fileFocusAlert.addEventListener('change', () => handleAudioImport(
+    fileFocusAlert,
+    'focusAlert',
+    'customFocusAlertName',
+    focusAlertFileName,
+    'focusAlertSound'
+  ));
+
+  fileBreakAlert.addEventListener('change', () => handleAudioImport(
+    fileBreakAlert,
+    'breakAlert',
+    'customBreakAlertName',
+    breakAlertFileName,
+    'breakAlertSound'
+  ));
+
+  calendarPrev.addEventListener('click', () => window.statsManager.changeMonth(-1));
+  calendarNext.addEventListener('click', () => window.statsManager.changeMonth(1));
+
   themeBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       themeBtns.forEach(b => b.classList.remove('active'));
@@ -216,11 +293,25 @@
   });
 
   function applySettings() {
+    window.soundManager.configure(settings);
     window.store.saveSettings(settings);
     timer.setDurations(settings.workDuration, settings.shortBreak, settings.longBreak);
     if (timer.isIdle) {
       timer.setMode(timer.mode); // refresh with new duration
     }
+  }
+
+  async function handleAudioImport(input, soundKey, nameKey, labelEl, selectKey) {
+    const file = input.files?.[0];
+    if (!file) return;
+    await window.soundManager.saveCustomFile(soundKey, file);
+    settings[nameKey] = file.name;
+    settings[selectKey] = 'custom';
+    labelEl.textContent = file.name;
+    setAmbience.value = settings.ambienceSound;
+    setFocusAlert.value = settings.focusAlertSound;
+    setBreakAlert.value = settings.breakAlertSound;
+    applySettings();
   }
 
   // Titlebar

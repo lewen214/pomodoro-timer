@@ -152,12 +152,78 @@
         <div class="setting-group">
           <label>
             <input type="checkbox" id="set-sound" checked>
-            声音提醒
+            启用声音
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="set-ambience">专注背景音</label>
+          <select id="set-ambience">
+            <option value="off">无声音</option>
+            <option value="white">白噪声</option>
+            <option value="rain">雨声</option>
+            <option value="forest">森林</option>
+            <option value="ocean">海浪</option>
+            <option value="fire">炉火</option>
+            <option value="custom">本地导入</option>
+          </select>
+          <div class="setting-slider compact">
+            <input type="range" id="set-ambience-volume" min="0" max="100" value="35">
+            <span id="set-ambience-volume-val">35</span>
+          </div>
+          <label class="file-picker">
+            <input type="file" id="file-ambience" accept="audio/*">
+            <span>导入背景音</span>
+            <small id="ambience-file-name">未选择文件</small>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="set-focus-alert">专注结束提示</label>
+          <select id="set-focus-alert">
+            <option value="chime">清亮铃声</option>
+            <option value="bell">钟声</option>
+            <option value="soft">柔和提示</option>
+            <option value="digital">电子音</option>
+            <option value="off">无声音</option>
+            <option value="custom">本地导入</option>
+          </select>
+          <label class="file-picker">
+            <input type="file" id="file-focus-alert" accept="audio/*">
+            <span>导入专注提示音</span>
+            <small id="focus-alert-file-name">未选择文件</small>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label for="set-break-alert">休息结束提示</label>
+          <select id="set-break-alert">
+            <option value="soft">柔和提示</option>
+            <option value="chime">清亮铃声</option>
+            <option value="bell">钟声</option>
+            <option value="digital">电子音</option>
+            <option value="off">无声音</option>
+            <option value="custom">本地导入</option>
+          </select>
+          <label class="file-picker">
+            <input type="file" id="file-break-alert" accept="audio/*">
+            <span>导入休息提示音</span>
+            <small id="break-alert-file-name">未选择文件</small>
           </label>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Calendar stats -->
+  <section class="calendar-panel" aria-label="专注日历">
+    <div class="calendar-header">
+      <button class="calendar-nav" id="calendar-prev" title="上个月">‹</button>
+      <div>
+        <h2 id="calendar-month">本月</h2>
+        <p id="calendar-summary">本月 0 次专注 · 0 分钟</p>
+      </div>
+      <button class="calendar-nav" id="calendar-next" title="下个月">›</button>
+    </div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </section>
 
   <!-- Settings button -->
   <button class="settings-btn" id="btn-settings" title="设置">
