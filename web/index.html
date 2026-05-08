@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="一个可爱的在线番茄钟，支持专注、短休息、长休息、主题切换和本地统计。">
+  <title>番茄钟 | 在线专注计时器</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- Title bar -->
+  <div class="titlebar">
+    <div class="titlebar-drag">
+      <span class="titlebar-icon">🍅</span>
+      <span class="titlebar-title">番茄钟</span>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="container">
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" data-mode="work">专注</button>
+      <button class="mode-tab" data-mode="shortBreak">短休息</button>
+      <button class="mode-tab" data-mode="longBreak">长休息</button>
+    </div>
+
+    <!-- Tomato timer -->
+    <div class="tomato-wrapper">
+      <div class="tomato" id="tomato">
+        <!-- Leaf -->
+        <div class="tomato-leaf">
+          <div class="leaf-left"></div>
+          <div class="leaf-right"></div>
+          <div class="leaf-stem"></div>
+        </div>
+        <!-- SVG progress ring -->
+        <svg class="tomato-ring" viewBox="0 0 240 240">
+          <circle class="ring-bg" cx="120" cy="120" r="100" />
+          <circle class="ring-progress" id="ring-progress" cx="120" cy="120" r="100" />
+        </svg>
+        <!-- Tomato body -->
+        <div class="tomato-body">
+          <!-- Face -->
+          <div class="tomato-face" id="tomato-face">
+            <div class="eyes">
+              <div class="eye left">
+                <div class="pupil"></div>
+              </div>
+              <div class="eye right">
+                <div class="pupil"></div>
+              </div>
+            </div>
+            <div class="mouth" id="mouth"></div>
+          </div>
+          <!-- Timer display -->
+          <div class="timer-display">
+            <div class="timer-time" id="timer-time">25:00</div>
+            <div class="timer-label" id="timer-label">准备开始</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pomodoro dots -->
+    <div class="pomodoro-dots" id="pomodoro-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-secondary" id="btn-reset" title="重置">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/></svg>
+      </button>
+      <button class="btn btn-primary" id="btn-start">
+        <span class="btn-icon" id="btn-start-icon">▶</span>
+        <span class="btn-text" id="btn-start-text">开始专注</span>
+      </button>
+      <button class="btn btn-secondary" id="btn-skip" title="跳过">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="currentColor"/></svg>
+      </button>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-value" id="stat-today-count">0</span>
+        <span class="stat-label">今日番茄</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-today-minutes">0</span>
+        <span class="stat-label">专注分钟</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value" id="stat-total-count">0</span>
+        <span class="stat-label">累计番茄</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div class="settings-overlay" id="settings-overlay">
+    <div class="settings-panel" id="settings-panel">
+      <div class="settings-header">
+        <h3>设置</h3>
+        <button class="settings-close" id="settings-close">✕</button>
+      </div>
+      <div class="settings-body">
+        <div class="setting-group">
+          <label>专注时长 (分钟)</label>
+          <div class="setting-slider">
+            <input type="range" id="set-work" min="1" max="60" value="25">
+            <span id="set-work-val">25</span>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>短休息 (分钟)</label>
+          <div class="setting-slider">
+            <input type="range" id="set-short" min="1" max="30" value="5">
+            <span id="set-short-val">5</span>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>长休息 (分钟)</label>
+          <div class="setting-slider">
+            <input type="range" id="set-long" min="1" max="60" value="15">
+            <span id="set-long-val">15</span>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>主题</label>
+          <div class="theme-buttons">
+            <button class="theme-btn active" data-theme="tomato">
+              <span class="theme-preview tomato-preview"></span>
+              番茄
+            </button>
+            <button class="theme-btn" data-theme="forest">
+              <span class="theme-preview forest-preview"></span>
+              森林
+            </button>
+            <button class="theme-btn" data-theme="ocean">
+              <span class="theme-preview ocean-preview"></span>
+              海洋
+            </button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>
+            <input type="checkbox" id="set-sound" checked>
+            声音提醒
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings button -->
+  <button class="settings-btn" id="btn-settings" title="设置">
+    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 00.12-.61l-1.92-3.32a.49.49 0 00-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 00-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 00-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 00-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1115.6 12 3.6 3.6 0 0112 15.6z" fill="currentColor"/></svg>
+  </button>
+
+  <script src="scripts/sounds.js"></script>
+  <script src="scripts/store.js"></script>
+  <script src="scripts/timer.js"></script>
+  <script src="scripts/stats.js"></script>
+  <script src="scripts/app.js"></script>
+</body>
+</html>

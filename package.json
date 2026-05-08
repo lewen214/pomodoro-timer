@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
+    "verify:web": "eslint web/scripts/*.js && node scripts/verify-web.mjs",
     "prepare": "husky"
   },
   "devDependencies": {
